@@ -18,9 +18,13 @@ export default class FindClientUseCase {
       id: client.id.id,
       name: client.name,
       email: client.email,
-      address: client.address,
-      createdAt: client.createdAt,
-      updatedAt: client.updatedAt,
+      document: client.document,
+      street: client.address.value.street,
+      number: client.address.value.number,
+      complement: client.address.value.complement,
+      city: client.address.value.city,
+      state: client.address.value.state,
+      zipCode: client.address.value.zipCode,
     };
   }
 }
