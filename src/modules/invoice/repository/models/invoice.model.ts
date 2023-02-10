@@ -1,5 +1,5 @@
 import { Column, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
-import ProductModel from "./product.model";
+import ItemsModel from "./product.model";
 
 @Table({
   tableName: "invoices",
@@ -34,8 +34,8 @@ export default class InvoiceModel extends Model {
   @Column({ allowNull: false, field: 'zip_code' })
   zipCode: string;
 
-  @HasMany(() => ProductModel)
-  items: ProductModel[]
+  @HasMany(() => ItemsModel)
+  items: ItemsModel[]
 
   @Column({ allowNull: false, field: "created_at" })
   createdAt: Date;

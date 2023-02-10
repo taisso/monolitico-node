@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize-typescript";
 import { randomUUID } from "node:crypto";
 import InvoiceModel from "./models/invoice.model";
-import ProductModel from "./models/product.model";
+import ItemsModel from "./models/product.model";
 import { InvoiceRepository } from "./invoice.repository";
 import { SequelizeInvoiceMapper } from "./mappers/sequelize-invoice.mappers";
 import { Invoice } from "../domain/invoice";
@@ -20,7 +20,7 @@ describe("InvoiceRepository test", () => {
       sync: { force: true },
     });
 
-    sequelize.addModels([InvoiceModel, ProductModel]);
+    sequelize.addModels([InvoiceModel, ItemsModel]);
     await sequelize.sync();
   });
 
@@ -54,7 +54,7 @@ describe("InvoiceRepository test", () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      { include: { model: ProductModel } }
+      { include: { model: ItemsModel } }
     );
 
     const invoice = new InvoiceRepository();
