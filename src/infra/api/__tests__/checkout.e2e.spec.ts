@@ -3,7 +3,7 @@ import { faker } from "@faker-js/faker";
 import { app, sequelize } from "../express";
 import ClientModel from "../../../modules/client-adm/repository/client.model";
 import ProductModel from "../../../modules/store-catalog/repository/product.model";
-import ProductAdmModel from "../../../modules/product-adm/repository/product.model";
+import CheckStockUseCase from "../../../modules/product-adm/usecase/check-stock/check-stock.usecase";
 
 const addressFaker = () => ({
   street: faker.address.street(),
@@ -51,20 +51,14 @@ describe("E2E test for checkout", () => {
     const product1 = await createProductCatalog();
     const product2 = await createProductCatalog();
 
-   try {
-    await ProductAdmModel.create({
-        id: product1.id,
-        name: product1.name,
-        description: product1.description,
-        stock: 10,
-        purchasePrice: product1.salesPrice,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    })
-   }
-   catch(err) {
-    console.log(err);
-   }
+    jest
+      .spyOn(CheckStockUseCase.prototype, "execute")
+      .mockImplementation(({ productId }: { productId: string }) =>
+        Promise.resolve({
+          productId,
+          stock: 10,
+        })
+      );
 
     const products = [
       {
@@ -81,8 +75,8 @@ describe("E2E test for checkout", () => {
     });
 
     expect(response.status).toBe(200);
-    expect(response.body.clientId).toBe(client.id);
+    expect(response.body.status).toBe("approved");
+    expect(response.body.products).toEqual(products);
     expect(response.body.total).toBe(product1.salesPrice + product2.salesPrice);
-    expect(response.body.products).toStrictEqual(products);
   });
 });

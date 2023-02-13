@@ -23,7 +23,6 @@ checkoutRoute.post("/", async (req: Request, res: Response) => {
     const output = await factory.create(productDto);
     res.send(output);
   } catch (err) {
-    console.log(err);
     res.status(500).send(err);
   }
 });
