@@ -2,6 +2,7 @@ import { Column, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescri
 import InvoiceModel from "./invoice.model";
 
 @Table({
+  modelName: 'items',
   tableName: "items",
   timestamps: false,
 })
@@ -20,9 +21,9 @@ export default class ItemsModel extends Model {
   @Column
   invoiceId: string
 
-  @Column({ allowNull: false, field: "created_at" })
+  @Column({ allowNull: false })
   createdAt: Date;
 
-  @Column({ allowNull: false, field: "updated_at" })
+  @Column({ allowNull: false })
   updatedAt: Date;
 }
