@@ -1,15 +1,26 @@
+import { resolve } from 'path'
 import request from "supertest";
 import { faker } from '@faker-js/faker'
-import { app, sequelize } from "../express";
+import { app } from "../express";
+import { migrator, sequelize } from '../../db/sequelize/config/umzug';
 
 describe("E2E test for client", () => {
+  beforeAll(() => {
+    sequelize.addModels([resolve() + '/**/*.model.ts'])
+  })
+
   beforeEach(async () => {
-    await sequelize.sync({ force: true });
+    await migrator.up();
+  });
+
+  afterEach(async () => {
+    await migrator.down();
   });
 
   afterAll(async () => {
     await sequelize.close();
   });
+
 
   it("should create a client", async () => {
     const clientFaker = {

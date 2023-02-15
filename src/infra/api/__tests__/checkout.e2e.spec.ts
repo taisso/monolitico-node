@@ -1,9 +1,10 @@
+import { resolve } from 'path'
 import request from "supertest";
 import { faker } from "@faker-js/faker";
-import { app, sequelize } from "../express";
+import { app } from "../express";
 import ClientModel from "../../../modules/client-adm/repository/client.model";
-import ProductModel from "../../../modules/store-catalog/repository/product.model";
-import CheckStockUseCase from "../../../modules/product-adm/usecase/check-stock/check-stock.usecase";
+import { migrator, sequelize } from "../../db/sequelize/config/umzug";
+import { QueryTypes } from 'sequelize';
 
 const addressFaker = () => ({
   street: faker.address.street(),
@@ -27,19 +28,58 @@ const createClient = async () => {
 };
 
 const createProductCatalog = async () => {
-  return ProductModel.create({
+  const price = +faker.commerce.price()
+ 
+  const product = {
     id: faker.datatype.uuid(),
     name: faker.commerce.productName(),
     description: faker.commerce.productDescription(),
-    salesPrice: +faker.commerce.price(),
+    purchasePrice: price,
+    stock: 10,
+    salesPrice: price,
     createdAt: new Date(),
     updatedAt: new Date(),
-  });
+  }
+
+  await sequelize.query(`
+    INSERT INTO
+      products (
+        id,
+        name,
+        description,
+        "purchasePrice",
+        "salesPrice",
+        stock,
+        "createdAt",
+        "updatedAt"
+      )
+    VALUES
+      ('${product.id}', 
+       '${product.name}', 
+       '${product.description}', 
+        ${product.purchasePrice}, 
+        ${product.salesPrice}, 
+        ${product.stock},
+        date('now'), 
+        date('now')
+      )
+  `, { type: QueryTypes.INSERT })
+
+  return product
 };
 
 describe("E2E test for checkout", () => {
+
+  beforeAll(() => {
+    sequelize.addModels([resolve() + '/**/*.model.ts'])
+  })
+
   beforeEach(async () => {
-    await sequelize.sync({ force: true });
+    await migrator.up();
+  });
+
+  afterEach(async () => {
+    await migrator.down();
   });
 
   afterAll(async () => {
@@ -50,16 +90,7 @@ describe("E2E test for checkout", () => {
     const client = await createClient();
     const product1 = await createProductCatalog();
     const product2 = await createProductCatalog();
-
-    jest
-      .spyOn(CheckStockUseCase.prototype, "execute")
-      .mockImplementation(({ productId }: { productId: string }) =>
-        Promise.resolve({
-          productId,
-          stock: 10,
-        })
-      );
-
+  
     const products = [
       {
         productId: product1.id,
@@ -78,5 +109,7 @@ describe("E2E test for checkout", () => {
     expect(response.body.status).toBe("approved");
     expect(response.body.products).toEqual(products);
     expect(response.body.total).toBe(product1.salesPrice + product2.salesPrice);
+
+
   });
 });

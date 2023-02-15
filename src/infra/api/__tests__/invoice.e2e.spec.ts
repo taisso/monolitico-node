@@ -1,12 +1,22 @@
+import { resolve } from 'path'
 import request from "supertest";
 import { faker } from "@faker-js/faker";
-import { app, sequelize } from "../express";
+import { app } from "../express";
 import InvoiceModel from "../../../modules/invoice/repository/models/invoice.model";
 import ItemsModel from "../../../modules/invoice/repository/models/product.model";
+import { migrator, sequelize } from '../../db/sequelize/config/umzug';
 
 describe("E2E test for invoice", () => {
+  beforeAll(() => {
+    sequelize.addModels([resolve() + '/**/*.model.ts'])
+  })
+
   beforeEach(async () => {
-    await sequelize.sync({ force: true });
+    await migrator.up();
+  });
+
+  afterEach(async () => {
+    await migrator.down();
   });
 
   afterAll(async () => {
