@@ -9,8 +9,16 @@ import Id from "../../@shared/domain/value-object/id.value-object";
 import { Address } from "../../@shared/domain/value-object/address.value-object";
 import { Product } from "../domain/product";
 
+const mockDate = new Date(2023, 1, 1);
+
 describe("InvoiceRepository test", () => {
   let sequelize: Sequelize;
+
+
+  beforeAll(() => {
+    jest.useFakeTimers("modern");
+    jest.setSystemTime(mockDate);
+  })
 
   beforeEach(async () => {
     sequelize = new Sequelize({
@@ -26,6 +34,10 @@ describe("InvoiceRepository test", () => {
 
   afterEach(async () => {
     await sequelize.close();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
   });
 
   it("should find a invoice", async () => {

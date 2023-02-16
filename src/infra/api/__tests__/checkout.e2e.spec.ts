@@ -54,9 +54,9 @@ const createProductCatalog = async () => {
         "updatedAt"
       )
     VALUES
-      ('${product.id}', 
-       '${product.name}', 
-       '${product.description}', 
+      ("${product.id}", 
+       "${product.name}", 
+       "${product.description}", 
         ${product.purchasePrice}, 
         ${product.salesPrice}, 
         ${product.stock},
@@ -68,9 +68,13 @@ const createProductCatalog = async () => {
   return product
 };
 
+const mockDate = new Date(2023, 1, 1);
+
 describe("E2E test for checkout", () => {
 
   beforeAll(() => {
+    jest.useFakeTimers("modern");
+    jest.setSystemTime(mockDate);
     sequelize.addModels([resolve() + '/**/*.model.ts'])
   })
 
@@ -83,6 +87,7 @@ describe("E2E test for checkout", () => {
   });
 
   afterAll(async () => {
+    jest.useRealTimers();
     await sequelize.close();
   });
 
